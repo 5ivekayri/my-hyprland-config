@@ -5,6 +5,11 @@ set -Eeuo pipefail
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 skip_packages=false
 
+if [[ "$EUID" -eq 0 ]]; then
+    printf 'Do not run this installer as root. Run it as your normal desktop user; sudo will be requested when needed.\n' >&2
+    exit 1
+fi
+
 if [[ "${1:-}" == "--skip-packages" ]]; then
     skip_packages=true
 elif [[ -n "${1:-}" ]]; then
@@ -24,20 +29,37 @@ install_packages() {
     fi
 
     local required=(
-        hyprland hyprpaper waybar wofi kitty thunar rofi
-        wlogout swaynotificationcenter grim slurp swappy wl-clipboard playerctl
-        brightnessctl pavucontrol jq bc ImageMagick ffmpeg
-        NetworkManager python3 papirus-icon-theme adw-gtk3-theme
+        hyprland hyprpaper hyprlock hypridle hyprsunset
+        waybar wofi rofi kitty thunar wlogout SwayNotificationCenter
+        grim slurp swappy wl-clipboard cliphist playerctl brightnessctl
+        pavucontrol jq bc ImageMagick ffmpeg-free cava wallust curl
+        NetworkManager NetworkManager-wifi bluez bluez-tools
+        pipewire pipewire-pulseaudio wireplumber
+        xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
+        xdg-user-dirs xdg-utils
+        mate-polkit libnotify util-linux procps-ng python3
+        papirus-icon-theme adw-gtk3-theme
+        jetbrains-mono-fonts jetbrainsmono-nerd-fonts
+        nerdfontssymbolsonly-nerd-fonts fira-code-fonts fontawesome-fonts-all
+        google-noto-sans-fonts google-noto-color-emoji-fonts
+        nwg-look qt5ct qt6ct
+        pamixer libcanberra-gtk3
     )
-    local optional=(wallust cliphist hyprlock hypridle hyprsunset cava)
+    local optional=()
 
     printf 'Installing required Fedora/Nobara packages...\n'
+    sudo -v
     sudo dnf install -y "${required[@]}"
 
-    printf 'Trying optional integration packages...\n'
-    for package in "${optional[@]}"; do
-        sudo dnf install -y "$package" || printf 'Optional package unavailable: %s\n' "$package"
-    done
+    if ((${#optional[@]})); then
+        printf 'Trying optional integration packages...\n'
+        for package in "${optional[@]}"; do
+            sudo dnf install -y "$package" || printf 'Optional package unavailable: %s\n' "$package"
+        done
+    fi
+
+    sudo systemctl enable --now NetworkManager
+    sudo systemctl enable --now bluetooth || true
 }
 
 if [[ "$skip_packages" == false ]]; then
@@ -46,7 +68,11 @@ fi
 
 timestamp="$(date +%Y%m%d-%H%M%S)"
 backup_dir="$HOME/.config-backups/my-hyprland-config-$timestamp"
-mkdir -p "$backup_dir" "$HOME/.config" "$HOME/.wallpapers"
+mkdir -p "$backup_dir" "$HOME/.config" "$HOME/.wallpapers" "$HOME/Pictures/screenshots"
+
+if command -v xdg-user-dirs-update >/dev/null 2>&1; then
+    xdg-user-dirs-update
+fi
 
 targets=(
     hypr waybar wofi kitty rofi wlogout swaync swappy wallust gtk-3.0 gtk-4.0
@@ -68,6 +94,10 @@ cp -a "$repo_dir/config/." "$HOME/.config/"
 cp -a "$repo_dir/wallpapers/thunderstorm-sea.webp" "$HOME/.wallpapers/"
 ln -sfn "$HOME/.wallpapers/thunderstorm-sea.webp" "$HOME/.config/rofi/.current_wallpaper"
 
+pictures_dir="$(xdg-user-dir PICTURES 2>/dev/null || printf '%s' "$HOME/Pictures")"
+mkdir -p "$pictures_dir/screenshots" "$pictures_dir/wallpapers"
+cp -a "$repo_dir/wallpapers/thunderstorm-sea.webp" "$pictures_dir/wallpapers/"
+
 find "$HOME/.config/hypr/scripts" "$HOME/.config/hypr/UserScripts" \
     -type f -name '*.sh' -exec chmod u+x {} + 2>/dev/null || true
 
@@ -86,5 +116,5 @@ fi
 
 printf '\nInstallation complete.\n'
 printf 'Backup: %s\n' "$backup_dir"
-printf 'If the session was not active, log out and back in to apply everything.\n'
+printf 'Reboot, choose the Hyprland session on the login screen, and sign in.\n'
 printf 'Review monitor names in ~/.config/hypr/monitors.conf if they differ from eDP-1 and HDMI-A-1.\n'

@@ -1,6 +1,7 @@
 # My Hyprland configuration
 
-My current Hyprland desktop for Fedora/Nobara: a dark stormy-ocean palette,
+My current Hyprland desktop for Fedora/Nobara, including bootstrap installation
+for a clean Nobara system: a dark stormy-ocean palette,
 transparent Waybar, Wofi application search, US/RU keyboard layouts, a compact
 GTK theme, wallpaper picker, notification center, power menu, screenshots and
 laptop/media controls.
@@ -13,6 +14,7 @@ laptop/media controls.
 > the existing versions to a timestamped directory under `~/.config-backups/`.
 
 ```bash
+sudo dnf install -y git
 git clone https://github.com/5ivekayri/my-hyprland-config.git
 cd my-hyprland-config
 chmod +x install.sh
@@ -25,8 +27,15 @@ If all dependencies are already installed:
 ./install.sh --skip-packages
 ```
 
-The automatic package step targets Fedora and Nobara. On other distributions,
-use `--skip-packages` and install equivalent packages manually.
+The automatic package step targets Fedora and Nobara. It installs Hyprland
+itself, the Wayland portal, PipeWire/WirePlumber, NetworkManager, a polkit
+agent, fonts, icon themes and all desktop utilities used by this configuration.
+On other distributions, use `--skip-packages` and install equivalent packages
+manually.
+
+After installation, reboot and choose **Hyprland** from the session selector on
+the login screen. Do not run the installer as root; it requests `sudo` only for
+packages and system services.
 
 ## Important shortcuts
 
@@ -61,6 +70,8 @@ If your output names differ, edit:
 - monitor blocks in `~/.config/hypr/hyprpaper.conf`
 
 Use `hyprctl monitors all` to find the correct names.
+Unknown output names automatically fall back to preferred resolution, automatic
+placement and scale 1, so a first login remains usable before customization.
 
 ## Included configuration
 

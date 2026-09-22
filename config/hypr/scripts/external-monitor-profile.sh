@@ -20,17 +20,24 @@ write_profile() {
     if [[ "$profile" == external ]]; then
         printf '%s\n' \
             '# Managed by external-monitor-profile.sh.' \
+            'monitor=,preferred,auto,1' \
             'monitor=eDP-1,disable' \
             'monitor=HDMI-A-1,1920x1080@100.0,0x0,1.0' >"$temp"
         "${hyprctl_cmd[@]}" keyword monitor "$external,1920x1080@100,0x0,1" >/dev/null
         "${hyprctl_cmd[@]}" keyword monitor "$internal,disable" >/dev/null
-    else
+    elif [[ "$profile" == internal ]]; then
         printf '%s\n' \
             '# Managed by external-monitor-profile.sh.' \
+            'monitor=,preferred,auto,1' \
             'monitor=eDP-1,preferred,0x0,1.25' \
             'monitor=HDMI-A-1,disable' >"$temp"
         "${hyprctl_cmd[@]}" keyword monitor "$internal,preferred,0x0,1.25" >/dev/null
         "${hyprctl_cmd[@]}" keyword monitor "$external,disable" >/dev/null 2>&1 || true
+    else
+        printf '%s\n' \
+            '# Managed by external-monitor-profile.sh.' \
+            'monitor=,preferred,auto,1' >"$temp"
+        "${hyprctl_cmd[@]}" keyword monitor ',preferred,auto,1' >/dev/null
     fi
 
     if ! cmp -s "$temp" "$config"; then
@@ -46,19 +53,22 @@ detect_and_apply() {
     if jq -e --arg output "$external" '.[] | select(.name == $output)' \
         >/dev/null 2>&1 <<<"$monitors"; then
         write_profile external
-    else
+    elif jq -e --arg output "$internal" '.[] | select(.name == $output)' \
+        >/dev/null 2>&1 <<<"$monitors"; then
         write_profile internal
+    else
+        write_profile generic
     fi
 }
 
 case "${1:-auto}" in
-    external|internal)
+    external|internal|generic)
         write_profile "$1"
         exit 0
         ;;
     auto) ;;
     *)
-        printf 'Usage: %s [auto|external|internal]\n' "$0" >&2
+        printf 'Usage: %s [auto|external|internal|generic]\n' "$0" >&2
         exit 2
         ;;
 esac
