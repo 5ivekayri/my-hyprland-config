@@ -29,9 +29,9 @@ write_profile() {
         printf '%s\n' \
             '# Managed by external-monitor-profile.sh.' \
             'monitor=,preferred,auto,1' \
-            'monitor=eDP-1,preferred,0x0,1.25' \
+            'monitor=eDP-1,preferred,0x0,1' \
             'monitor=HDMI-A-1,disable' >"$temp"
-        "${hyprctl_cmd[@]}" keyword monitor "$internal,preferred,0x0,1.25" >/dev/null
+        "${hyprctl_cmd[@]}" keyword monitor "$internal,preferred,0x0,1" >/dev/null
         "${hyprctl_cmd[@]}" keyword monitor "$external,disable" >/dev/null 2>&1 || true
     else
         printf '%s\n' \

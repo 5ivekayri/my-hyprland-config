@@ -65,7 +65,7 @@ packages and system services.
 
 The checked-in profile matches the source laptop:
 
-- internal display: `eDP-1`, 125% scale;
+- internal display: `eDP-1`, 100% scale;
 - external display: `HDMI-A-1`, 1920×1080 at 100 Hz;
 - connecting HDMI automatically switches to the external display.
 
