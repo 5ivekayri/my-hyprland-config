@@ -28,21 +28,44 @@ install_packages() {
         return
     fi
 
-    printf 'Checking the Hyprland package source...\n'
-    sudo -v
+    package_available() {
+        local package="$1"
+        rpm -q "$package" >/dev/null 2>&1 ||
+            [[ -n "$(dnf -q repoquery --available --qf '%{name}' "$package" 2>/dev/null)" ]]
+    }
 
-    if ! rpm -q hyprland >/dev/null 2>&1 && \
-       [[ -z "$(dnf -q repoquery --available --qf '%{name}' hyprland 2>/dev/null)" ]]; then
-        printf 'Enabling the Fedora 44 compatible sdegler/hyprland COPR...\n'
-        sudo dnf install -y dnf5-plugins
-        sudo dnf copr enable -y sdegler/hyprland
-    fi
+    enable_copr_for_package() {
+        local package="$1"
+        local copr="$2"
+        local include_only="${3:-}"
+        local repo_file
+
+        if package_available "$package"; then
+            return
+        fi
+
+        printf 'Enabling COPR %s for %s...\n' "$copr" "$package"
+        sudo dnf copr enable -y "$copr"
+
+        if [[ -n "$include_only" ]]; then
+            repo_file="/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:${copr//\//:}.repo"
+            if [[ -f "$repo_file" ]] && ! grep -qFx "includepkgs=$include_only" "$repo_file"; then
+                printf 'includepkgs=%s\n' "$include_only" | sudo tee -a "$repo_file" >/dev/null
+            fi
+        fi
+    }
+
+    printf 'Checking package sources (based on JaKooLit/Fedora-Hyprland)...\n'
+    sudo -v
+    sudo dnf install -y dnf5-plugins
+    enable_copr_for_package hyprland sdegler/hyprland
+    enable_copr_for_package wallust errornointernet/packages wallust
 
     local required=(
         hyprland hyprpaper hyprlock hypridle hyprsunset
         waybar wofi rofi kitty thunar wlogout SwayNotificationCenter
         grim slurp swappy wl-clipboard cliphist playerctl brightnessctl
-        pavucontrol jq bc ImageMagick ffmpeg-free cava curl
+        pavucontrol jq bc ImageMagick ffmpeg-free cava wallust curl
         NetworkManager NetworkManager-wifi bluez bluez-tools
         pipewire pipewire-pulseaudio wireplumber
         xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
@@ -55,7 +78,7 @@ install_packages() {
         nwg-look qt5ct qt6ct
         pamixer libcanberra-gtk3
     )
-    local optional=(wallust)
+    local optional=()
 
     printf 'Installing required Fedora/Nobara packages...\n'
     sudo dnf install -y "${required[@]}"
