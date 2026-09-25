@@ -30,6 +30,11 @@ If all dependencies are already installed:
 The automatic package step targets Fedora and Nobara. It installs Hyprland
 itself, the Wayland portal, PipeWire/WirePlumber, NetworkManager, a polkit
 agent, fonts, icon themes and all desktop utilities used by this configuration.
+On a clean Nobara 44 installation it enables the `sdegler/hyprland` COPR only
+when Hyprland is unavailable from repositories already configured on the
+machine. That COPR provides native Fedora 44 builds; the installer does not
+enable Rawhide repositories. `wallust` is optional, and the included static
+color files keep the theme usable when it is unavailable.
 On other distributions, use `--skip-packages` and install equivalent packages
 manually.
 

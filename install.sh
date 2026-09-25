@@ -28,11 +28,21 @@ install_packages() {
         return
     fi
 
+    printf 'Checking the Hyprland package source...\n'
+    sudo -v
+
+    if ! rpm -q hyprland >/dev/null 2>&1 && \
+       [[ -z "$(dnf -q repoquery --available --qf '%{name}' hyprland 2>/dev/null)" ]]; then
+        printf 'Enabling the Fedora 44 compatible sdegler/hyprland COPR...\n'
+        sudo dnf install -y dnf5-plugins
+        sudo dnf copr enable -y sdegler/hyprland
+    fi
+
     local required=(
         hyprland hyprpaper hyprlock hypridle hyprsunset
         waybar wofi rofi kitty thunar wlogout SwayNotificationCenter
         grim slurp swappy wl-clipboard cliphist playerctl brightnessctl
-        pavucontrol jq bc ImageMagick ffmpeg-free cava wallust curl
+        pavucontrol jq bc ImageMagick ffmpeg-free cava curl
         NetworkManager NetworkManager-wifi bluez bluez-tools
         pipewire pipewire-pulseaudio wireplumber
         xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
@@ -45,10 +55,9 @@ install_packages() {
         nwg-look qt5ct qt6ct
         pamixer libcanberra-gtk3
     )
-    local optional=()
+    local optional=(wallust)
 
     printf 'Installing required Fedora/Nobara packages...\n'
-    sudo -v
     sudo dnf install -y "${required[@]}"
 
     if ((${#optional[@]})); then
