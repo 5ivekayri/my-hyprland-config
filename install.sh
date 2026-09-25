@@ -71,7 +71,7 @@ install_packages() {
         xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
         xdg-user-dirs xdg-utils
         mate-polkit libnotify util-linux procps-ng python3
-        papirus-icon-theme adw-gtk3-theme
+        papirus-icon-theme adw-gtk3-theme bibata-cursor-theme
         jetbrains-mono-fonts jetbrainsmono-nerd-fonts
         nerdfontssymbolsonly-nerd-fonts fira-code-fonts fontawesome-fonts-all
         google-noto-sans-fonts google-noto-color-emoji-fonts
@@ -136,6 +136,8 @@ find "$HOME/.config/hypr/scripts" "$HOME/.config/hypr/UserScripts" \
 if command -v gsettings >/dev/null 2>&1; then
     gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark' || true
     gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark' || true
+    gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice' || true
+    gsettings set org.gnome.desktop.interface cursor-size 24 || true
     gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
     gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close' || true
 fi

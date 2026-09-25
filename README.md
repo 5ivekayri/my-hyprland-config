@@ -4,7 +4,7 @@ My current Hyprland desktop for Fedora/Nobara, including bootstrap installation
 for a clean Nobara system: a dark stormy-ocean palette,
 transparent Waybar, Wofi application search, US/RU keyboard layouts, a compact
 GTK theme, wallpaper picker, notification center, power menu, screenshots and
-laptop/media controls.
+laptop/media controls. The cursor uses the light Bibata Modern Ice theme.
 
 ![Wallpaper](wallpapers/thunderstorm-sea.webp)
 
